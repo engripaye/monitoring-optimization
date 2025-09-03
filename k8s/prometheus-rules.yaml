@@ -1,0 +1,27 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: cluster-critical-rules
+namespace: observability
+spec:
+groups:
+  - name: kube.rules
+rules:
+  - alert: HighCPUUsage
+expr: sum(rate(container_cpu_usage_seconds_total{image!="",container!~"POD|pause"}[5m])) by (namespace, pod) / sum(kube_pod_container_resource_limits_cpu_cores{job="kube-state-metrics"}) by (namespace, pod) > 0.8
+for: 5m
+labels:
+severity: warning
+annotations:
+summary: "Pod {{ $labels.pod }} CPU usage high in namespace {{ $labels.namespace }}"
+description: "CPU usage > 80% for more than 5m"
+
+
+  - alert: PodCrashLooping
+expr: increase(kube_pod_container_status_restarts_total[15m]) > 3
+for: 0m
+labels:
+severity: critical
+annotations:
+summary: "Pod {{ $labels.pod }} is restarting frequently"
+runbook: "/runbooks/pod-crashloop.md"

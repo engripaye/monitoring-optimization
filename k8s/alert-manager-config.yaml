@@ -1,0 +1,12 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Alertmanager
+metadata:
+  name: main
+  namespace: observability
+spec:
+replicas: 3
+version: v0.24.0
+routePrefix: /
+alertmanagerConfigSelector: {}
+alertmanagerConfig:
+# For simple setups, use the inline config in helm values or secret-based config
